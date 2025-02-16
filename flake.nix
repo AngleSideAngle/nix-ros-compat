@@ -89,6 +89,7 @@
             done
         '';
         pkg-list = with pkgs.lib; splitString "\n" (trim (builtins.readFile cmd));
+        # rospkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) null pkgs.rosPackages.${distro};
         rospkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) null pkgs.rosPackages.${distro};
         pkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) (rospkg-str-to-deriv str) pkgs;
         deriv-list = map pkg-str-to-deriv pkg-list;
