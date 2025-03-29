@@ -67,9 +67,9 @@
         '';
       });
 
-      get-packages = key: distro:
+      get-packages = path: key: distro:
         let cmd = pkgs.runCommand "get-packages" {
-          src = ./.;
+          src = ./demos/lifecycle/package.xml;
           env = {
             ROS_HOME = "${rosdep-cache}";
             ROSDEP_SOURCE_PATH = "{rosdistro}/rosdep/sources.list.d";
@@ -88,11 +88,11 @@
               fi
             done
         '';
-        pkg-list = with pkgs.lib; splitString "\n" (trim (builtins.readFile cmd));
+        pkg-key-list = with pkgs.lib; splitString "\n" (trim (builtins.readFile cmd));
         # rospkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) null pkgs.rosPackages.${distro};
         rospkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) null pkgs.rosPackages.${distro};
-        pkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) (rospkg-str-to-deriv str) pkgs;
-        deriv-list = map pkg-str-to-deriv pkg-list;
+        nixpkg-str-to-deriv = with pkgs.lib; str: attrByPath (splitString "." str) (rospkg-str-to-deriv str) pkgs;
+        deriv-list = map nixpkg-str-to-deriv pkg-key-list;
         in deriv-list;
 
       build-legacy-package = src: distro: pkgs.stdenv.mkDerivation {};
