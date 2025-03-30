@@ -10,9 +10,10 @@
     };
     rosdistro-src = { url = "github:ros/rosdistro"; flake = false; };
     flake-utils.url = "github:numtide/flake-utils";
+    ros-demos-src = { url = "github:ros2/demos"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, nix-ros-overlay, rosdistro-src, flake-utils } @ inputs:
+  outputs = { self, nixpkgs, nix-ros-overlay, rosdistro-src, flake-utils, ros-demos-src }:
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = import nixpkgs {
         inherit system;
@@ -67,9 +68,9 @@
         '';
       });
 
-      get-packages = path: key: distro:
+      get-packages = src: key: distro:
         let cmd = pkgs.runCommand "get-packages" {
-          src = ./demos/lifecycle/package.xml;
+          inherit src;
           env = {
             ROS_HOME = "${rosdep-cache}";
             ROSDEP_SOURCE_PATH = "{rosdistro}/rosdep/sources.list.d";
@@ -102,7 +103,7 @@
       in
       {
         lib = { inherit build-legacy-package; };
-        packages.default = get-packages;
+        packages.default = get-packages "${ros-demos-src}/demo_nodes_cpp/";
         devShells.default = with pkgs; mkShell {
           inputsFrom = [ get-packages ];
           packages = [ rosdep superflore pyright ];
